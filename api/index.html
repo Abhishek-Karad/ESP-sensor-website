@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sensor Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    h1 {
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 300;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .subtitle {
+      color: rgba(255,255,255,0.8);
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .stat-value {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      font-size: 1.1rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+    
+    .data-section {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid #e1e5e9;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    
+    th {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 15px 20px;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.9rem;
+    }
+    
+    td {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f1f3f4;
+      font-size: 0.95rem;
+    }
+    
+    tr:hover {
+      background: #f8f9ff;
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    
+    .status-online {
+      background: #10b981;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+    
+    .status-offline {
+      background: #ef4444;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+    }
+    
+    .loading-state, .error-state, .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+      font-size: 1.1rem;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .last-update {
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+      
+      .stat-card {
+        padding: 20px;
+      }
+      
+      .stat-value {
+        font-size: 2.5rem;
+      }
+      
+      .data-section {
+        padding: 20px;
+      }
+      
+      th, td {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+      }
+      
+      th {
+        font-size: 0.8rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .stat-value {
+        font-size: 2rem;
+      }
+      
+      .stat-label {
+        font-size: 1rem;
+      }
+      
+      th, td {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Sensor Dashboard</h1>
+      <p class="subtitle">Real-time Environmental Monitoring</p>
+    </div>
+    
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="current-temp">--</div>
+        <div class="stat-label">Temperature</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="current-humidity">--</div>
+        <div class="stat-label">Humidity</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="sensor-status">
+          <span class="status-indicator status-offline"></span>
+          Offline
+        </div>
+        <div class="stat-label">Sensor Status</div>
+      </div>
+    </div>
+    
+    <div class="data-section">
+      <h2 class="section-title">Recent Readings</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Temperature</th>
+              <th>Humidity</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="data-table">
+            <tr>
+              <td colspan="3" class="loading-state">
+                <div class="loading-spinner"></div>
+                <div>Loading sensor data...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="last-update" id="last-update">
+        Last updated: Never
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let lastUpdateTime = null;
+    
+    function updateStats(data) {
+      if (data.length > 0) {
+        const latest = data[0];
+        document.getElementById('current-temp').textContent = `${latest.temperature}°C`;
+        document.getElementById('current-humidity').textContent = `${latest.humidity}%`;
+        
+        const statusElement = document.getElementById('sensor-status');
+        statusElement.innerHTML = `
+          <span class="status-indicator status-online"></span>
+          Online
+        `;
+      }
+    }
+    
+    function formatTimestamp(timestamp) {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+      
+      if (diffInMinutes < 1) {
+        return 'Just now';
+      } else if (diffInMinutes < 60) {
+        return `${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
+      } else {
+        return date.toLocaleString();
+      }
+    }
+    
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/data');
+        const data = await res.json();
+        
+        const tableBody = document.getElementById('data-table');
+        
+        if (data.length === 0) {
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="3" class="empty-state">
+                No sensor readings available yet
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        updateStats(data);
+        
+        tableBody.innerHTML = "";
+        data.slice(0, 10).forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.temperature}°C</td>
+            <td>${item.humidity}%</td>
+            <td>${formatTimestamp(item.createdAt)}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+        
+        lastUpdateTime = new Date();
+        document.getElementById('last-update').textContent = 
+          `Last updated: ${lastUpdateTime.toLocaleTimeString()}`;
+          
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        document.getElementById('data-table').innerHTML = `
+          <tr>
+            <td colspan="3" class="error-state">
+              Unable to load sensor data. Please check your connection.
+            </td>
+          </tr>
+        `;
+        
+        const statusElement = document.getElementById('sensor-status');
+        statusElement.innerHTML = `
+          <span class="status-indicator status-offline"></span>
+          Error
+        `;
+      }
+    }
+    
+    // Initial load
+    fetchData();
+    
+    // Refresh every 5 seconds
+    setInterval(fetchData, 5000);
+    
+    // Update "time ago" labels every minute
+    setInterval(() => {
+      const rows = document.querySelectorAll('#data-table tr');
+      rows.forEach((row, index) => {
+        const timestampCell = row.cells[2];
+        if (timestampCell && !timestampCell.textContent.includes('Loading') && 
+            !timestampCell.textContent.includes('Error') && 
+            !timestampCell.textContent.includes('No sensor')) {
+          // This would need the original timestamp to work properly
+          // For now, we'll refresh the data to get updated "time ago" labels
+        }
+      });
+    }, 60000);
+  </script>
+</body>
+</html>
